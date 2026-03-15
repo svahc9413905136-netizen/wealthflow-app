@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WealthFlow | AI Advisor Edition</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#111827">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body::-webkit-scrollbar { display: none; }
+        .translate-y-full { transform: translateY(100%); }
+        .translate-y-0 { transform: translateY(0); }
+        * { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans pb-28 antialiased">
+
+    <header class="pt-10 pb-8 px-6 bg-gray-800 rounded-b-[2.5rem] shadow-2xl relative z-10">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold tracking-wide text-white">Cashflow<span class="text-emerald-400">Ultra</span></h1>
+            
+            <div class="flex space-x-3">
+                <button id="advisor-btn" class="text-purple-400 bg-purple-900/30 p-2 rounded-xl hover:bg-purple-800/50 transition shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-pulse" title="Rich Dad AI Advisor">
+                    <i class="ph-fill ph-robot text-2xl"></i>
+                </button>
+                <button id="export-json-btn" class="text-blue-400 bg-blue-900/30 p-2 rounded-xl" title="Backup/Share File"><i class="ph ph-share-network text-xl"></i></button>
+                <input type="file" id="import-file" class="hidden" accept=".json">
+                <button id="import-btn" class="text-orange-400 bg-orange-900/30 p-2 rounded-xl" title="Restore Data"><i class="ph ph-download-simple text-xl"></i></button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-900/50 p-5 rounded-3xl border border-gray-700">
+            <p class="text-gray-400 text-sm mb-2 font-medium">Net Worth</p>
+            <h2 class="text-4xl font-extrabold text-white tracking-tight mb-4" id="net-worth">₹0</h2>
+            
+            <div class="grid grid-cols-3 gap-2 border-t border-gray-700/50 pt-4">
+                <div><p class="text-xs text-gray-400 mb-1">🏦 Bank</p><p class="text-sm font-bold text-white" id="bank-balance">₹0</p></div>
+                <div><p class="text-xs text-gray-400 mb-1">💵 Cash</p><p class="text-sm font-bold text-white" id="cash-balance">₹0</p></div>
+                <div><p class="text-xs text-gray-400 mb-1">💳 CC Due</p><p class="text-sm font-bold text-red-400" id="cc-due">₹0</p></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-6 mt-6 space-y-6 relative z-0">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50">
+                <div class="flex items-center space-x-2 text-emerald-400 mb-2"><i class="ph-fill ph-wallet text-xl"></i><span class="text-xs">Total Income</span></div>
+                <p class="text-xl font-bold text-white truncate" id="total-income">₹0</p>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50">
+                <div class="flex items-center space-x-2 text-red-400 mb-2"><i class="ph-fill ph-warning-circle text-xl"></i><span class="text-xs">Liabilities (EMI)</span></div>
+                <p class="text-xl font-bold text-orange-400 truncate" id="total-liabilities">₹0</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-3xl border border-gray-700/50 shadow-lg mb-8">
+            <div class="relative mb-4">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="search-input" placeholder="Search specific ledger..." class="w-full bg-gray-900 text-sm text-white pl-10 pr-4 py-3 rounded-xl border border-gray-700 focus:border-emerald-500 outline-none">
+            </div>
+            <div id="transaction-list" class="space-y-4"></div>
+        </div>
+    </main>
+
+    <button id="fab-btn" class="fixed bottom-8 right-6 bg-emerald-500 hover:bg-emerald-400 text-gray-900 p-4 rounded-2xl shadow-[0_8px_30px_rgba(16,185,129,0.3)] z-40">
+        <i class="ph ph-plus text-3xl font-bold"></i>
+    </button>
+
+    <div id="add-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end items-center opacity-100">
+        <div id="modal-content" class="bg-gray-800 w-full max-w-md rounded-t-[2.5rem] p-8 transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-2xl font-bold text-white">New Record</h3>
+                <button id="close-modal-btn" class="text-gray-400 bg-gray-700/50 p-2 rounded-full"><i class="ph ph-x text-xl font-bold"></i></button>
+            </div>
+            <form id="add-form" class="space-y-4">
+                <input type="hidden" id="edit-id" value="">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-400 ml-1">Date</label>
+                        <input type="datetime-local" id="datetime-input" required class="w-full bg-gray-900 text-xs text-white px-3 py-3 rounded-xl border border-gray-700 mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 ml-1">Wallet Source</label>
+                        <select id="wallet-input" class="w-full bg-gray-900 text-sm text-white px-3 py-3 rounded-xl border border-gray-700 mt-1">
+                            <option value="Bank">🏦 Bank</option>
+                            <option value="Cash">💵 Cash</option>
+                            <option value="Credit Card">💳 Credit Card</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-400 ml-1">Amount (₹)</label>
+                    <input type="number" id="amount-input" required step="any" class="w-full bg-gray-900 text-2xl font-bold text-white px-4 py-3 rounded-xl border border-gray-700 mt-1">
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-400 ml-1">Description</label>
+                    <input type="text" id="desc-input" required class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 mt-1">
+                </div>
+
+                <div class="flex items-center mt-2 mb-2 bg-gray-900/50 p-3 rounded-xl border border-gray-700/50">
+                    <input type="checkbox" id="recurring-input" class="w-5 h-5 text-emerald-500 rounded bg-gray-700">
+                    <label for="recurring-input" class="ml-3 text-sm text-gray-300">Monthly recurring EMI/Bill</label>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-400 ml-1 block mb-2">Category (Rich Dad Rules)</label>
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <button type="button" data-category="Need" class="cat-btn bg-blue-500 text-white py-2 rounded-xl text-xs font-semibold">Need</button>
+                        <button type="button" data-category="Want" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Want</button>
+                        <button type="button" data-category="Liability" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Liability</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" data-category="Active Income" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Active Income</button>
+                        <button type="button" data-category="Passive Income" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Passive Income</button>
+                        <button type="button" data-category="Asset" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Asset</button>
+                    </div>
+                    <input type="hidden" id="selected-category" value="Need">
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-500 text-gray-900 font-extrabold py-4 rounded-xl mt-2">Save Record</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="advisor-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex-col justify-center items-center opacity-100 p-6">
+        <div class="bg-gray-800 w-full max-w-md rounded-[2rem] p-8 shadow-[0_0_40px_rgba(168,85,247,0.2)] border border-purple-900/50">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-2">
+                    <i class="ph-fill ph-robot text-3xl text-purple-400"></i>
+                    <h3 class="text-xl font-bold text-white">Rich Dad AI</h3>
+                </div>
+                <button id="close-advisor-btn" class="text-gray-400 hover:text-white"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            
+            <p class="text-sm text-gray-400 mb-6">Me aapke financials check karke bataunga ki aapko konsi chiz leni chahiye ya nahi.</p>
+
+            <label class="text-sm font-medium text-gray-300 block mb-2">Main kya kharidne ka soch raha hu?</label>
+            <select id="purchase-type" class="w-full bg-gray-900 text-white px-4 py-4 rounded-xl border border-gray-700 outline-none mb-6">
+                <option value="Car">🚗 Nayi Gaadi (Car)</option>
+                <option value="Home">🏠 Naya Ghar (Home)</option>
+                <option value="Gadget">📱 Gadget / Luxury</option>
+            </select>
+
+            <button id="run-advisor-btn" class="w-full bg-purple-500 text-white font-extrabold py-4 rounded-xl hover:bg-purple-400 transition-colors shadow-lg shadow-purple-500/30">
+                Check My Reality
+            </button>
+
+            <div id="advisor-result" class="mt-6 hidden bg-gray-900 p-5 rounded-2xl border border-gray-700">
+                <h4 id="adv-title" class="font-bold text-lg mb-2">Verdict</h4>
+                <p id="adv-desc" class="text-sm text-gray-300 mb-3"></p>
+                <div class="bg-gray-800 p-3 rounded-xl">
+                    <p class="text-xs text-gray-400">Safe Budget Limit:</p>
+                    <p id="adv-budget" class="text-2xl font-bold text-emerald-400">₹0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+        }
+    </script>
+</body>
+</html>
