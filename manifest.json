@@ -1,15 +1,23 @@
 {
-  "name": "Jewellery Cam Pro",
-  "short_name": "JewelCam",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#D4AF37",
+  "short_name": "WealthFlow",
+  "name": "WealthFlow Ultra: AI Financial Advisor",
+  "description": "Smart personal finance tracker and AI advisor based on Rich Dad philosophy.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/685/685655.png",
+      "src": "icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512x512.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#111827",
+  "background_color": "#111827"
 }
