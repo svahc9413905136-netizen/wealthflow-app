@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wealthflow-pro-v1';
+const CACHE_NAME = 'wealthflow-pro-v2';
 
 // 1. Files to save immediately (Local files)
 const STATIC_ASSETS = [
