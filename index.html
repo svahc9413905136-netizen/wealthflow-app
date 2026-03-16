@@ -6,6 +6,8 @@
     <title>WealthFlow | AI Advisor Edition</title>
     
     <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#111827">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,159 +19,175 @@
         .translate-y-full { transform: translateY(100%); }
         .translate-y-0 { transform: translateY(0); }
         * { -webkit-tap-highlight-color: transparent; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans pb-28 antialiased">
 
-    <header class="pt-10 pb-8 px-6 bg-gray-800 rounded-b-[2.5rem] shadow-2xl relative z-10">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold tracking-wide text-white">Cashflow<span class="text-emerald-400">Ultra</span></h1>
+    <div id="pin-screen" class="fixed inset-0 bg-gray-900 z-[100] flex flex-col justify-center items-center p-6">
+        <div id="pin-box" class="bg-gray-800 p-8 rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] w-full max-w-sm border border-gray-700 text-center transition-all">
             
-            <div class="flex space-x-3">
-                <button id="advisor-btn" class="text-purple-400 bg-purple-900/30 p-2 rounded-xl hover:bg-purple-800/50 transition shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-pulse" title="Rich Dad AI Advisor">
-                    <i class="ph-fill ph-robot text-2xl"></i>
-                </button>
-                <button id="export-json-btn" class="text-blue-400 bg-blue-900/30 p-2 rounded-xl" title="Backup/Share File"><i class="ph ph-share-network text-xl"></i></button>
-                <input type="file" id="import-file" class="hidden" accept=".json">
-                <button id="import-btn" class="text-orange-400 bg-orange-900/30 p-2 rounded-xl" title="Restore Data"><i class="ph ph-download-simple text-xl"></i></button>
+            <div id="pin-main-view">
+                <i id="lock-icon" class="ph-fill ph-lock-key text-6xl text-emerald-400 mb-4 inline-block drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-colors"></i>
+                <h2 id="pin-title" class="text-2xl font-bold text-white mb-2">सिक्योरिटी पिन</h2>
+                <p id="pin-desc" class="text-sm text-gray-400 mb-4">पहली बार 4-अंकों का नया पिन सेट करें</p>
+                
+                <p id="lockout-timer" class="text-red-400 font-bold text-lg mb-4 hidden"></p>
+
+                <div id="setup-extras" class="hidden mb-6 text-left bg-gray-900 p-4 rounded-xl border border-gray-700">
+                    <label class="text-xs text-gray-400 block mb-1">रिकवरी सवाल (पिन भूलने पर काम आएगा)</label>
+                    <input type="text" id="security-q" placeholder="उदा: बचपन के दोस्त का नाम?" class="w-full bg-gray-800 text-sm text-white px-3 py-2 rounded-lg border border-gray-600 mb-3 outline-none focus:border-emerald-500">
+                    <input type="text" id="security-a" placeholder="जवाब लिखें..." class="w-full bg-gray-800 text-sm text-white px-3 py-2 rounded-lg border border-gray-600 outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="flex justify-center mb-6">
+                    <input type="password" id="pin-input" inputmode="numeric" maxlength="4" class="w-40 bg-gray-900 text-center text-4xl font-bold text-white px-4 py-4 rounded-2xl border border-gray-700 focus:border-emerald-500 outline-none tracking-[0.3em] transition-all" placeholder="••••">
+                </div>
+                
+                <button id="pin-action-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-extrabold py-4 rounded-xl transition shadow-[0_4px_15px_rgba(16,185,129,0.3)]">पिन सेट करें</button>
+                <button id="forgot-pin-btn" class="mt-5 text-xs text-blue-400 underline hidden hover:text-blue-300">पिन भूल गए? (रिकवरी करें)</button>
             </div>
+
+            <div id="recovery-view" class="hidden text-left">
+                <button id="back-to-pin-btn" class="text-gray-400 mb-4 hover:text-white"><i class="ph ph-arrow-left text-xl"></i> वापस जाएँ</button>
+                <h3 class="text-xl font-bold text-white mb-4">पिन रिकवरी</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">मास्टर रिकवरी कोड (Master Key)</p>
+                        <input type="text" id="recover-key" placeholder="A1B2-C3D4" class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 uppercase">
+                    </div>
+                    <div class="text-center text-gray-500 text-sm font-bold">--- या (OR) ---</div>
+                    <div>
+                        <p class="text-xs text-gray-400 mb-1">आपका गुप्त सवाल:</p>
+                        <p id="recover-q-text" class="text-sm font-medium text-blue-300 mb-2 bg-blue-900/30 p-2 rounded-lg border border-blue-800/50"></p>
+                        <input type="text" id="recover-a" placeholder="जवाब लिखें..." class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <button id="verify-recover-btn" class="w-full bg-blue-500 hover:bg-blue-400 text-white font-extrabold py-4 rounded-xl mt-6 transition shadow-[0_4px_15px_rgba(59,130,246,0.3)]">वेरीफाई करें (Unlock)</button>
+                
+                <div class="mt-6 pt-4 border-t border-gray-700 text-center">
+                    <button id="hard-reset-btn" class="text-xs text-red-400 underline hover:text-red-300">कुछ भी याद नहीं? (सारा डेटा डिलीट करें)</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <header class="pt-8 pb-8 px-6 bg-gray-800 rounded-b-[2.5rem] shadow-2xl relative z-10">
+        <h1 class="text-2xl font-bold tracking-wide text-white mb-4">Cashflow<span class="text-emerald-400">Ultra</span></h1>
+        
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button id="guide-btn" class="flex items-center space-x-1 text-yellow-400 bg-yellow-900/30 px-3 py-2 rounded-xl text-xs font-bold hover:bg-yellow-800/50"><i class="ph-fill ph-book-open-text text-lg"></i> <span>सीखें</span></button>
+            <button id="advisor-btn" class="flex items-center space-x-1 text-purple-400 bg-purple-900/30 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-800/50 animate-pulse"><i class="ph-fill ph-robot text-lg"></i> <span>AI सलाहकार</span></button>
+            <button id="export-json-btn" class="flex items-center space-x-1 text-blue-400 bg-blue-900/30 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-800/50"><i class="ph ph-share-network text-lg"></i> <span>बैकअप</span></button>
+            <label class="flex items-center space-x-1 text-orange-400 bg-orange-900/30 px-3 py-2 rounded-xl text-xs font-bold hover:bg-orange-800/50 cursor-pointer"><i class="ph ph-download-simple text-lg"></i> <span>रिस्टोर</span><input type="file" id="import-file" class="hidden" accept=".json"></label>
+            <button id="reset-app-btn" class="flex items-center space-x-1 text-red-400 bg-red-900/30 px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-800/50"><i class="ph-fill ph-trash text-lg"></i> <span>पूरा ऐप रिसेट</span></button>
         </div>
         
         <div class="bg-gray-900/50 p-5 rounded-3xl border border-gray-700">
-            <p class="text-gray-400 text-sm mb-2 font-medium">Net Worth</p>
+            <p class="text-gray-400 text-sm mb-2 font-medium">कुल संपत्ति (Net Worth)</p>
             <h2 class="text-4xl font-extrabold text-white tracking-tight mb-4" id="net-worth">₹0</h2>
-            
             <div class="grid grid-cols-3 gap-2 border-t border-gray-700/50 pt-4">
                 <div><p class="text-xs text-gray-400 mb-1">🏦 Bank</p><p class="text-sm font-bold text-white" id="bank-balance">₹0</p></div>
                 <div><p class="text-xs text-gray-400 mb-1">💵 Cash</p><p class="text-sm font-bold text-white" id="cash-balance">₹0</p></div>
                 <div><p class="text-xs text-gray-400 mb-1">💳 CC Due</p><p class="text-sm font-bold text-red-400" id="cc-due">₹0</p></div>
+            </div>
+            <div class="mt-5">
+                <div class="flex justify-between text-xs text-gray-400 mb-1"><span>आज़ादी (Freedom)</span><span id="freedom-text" class="font-bold text-emerald-400">0%</span></div>
+                <div class="w-full bg-gray-800 rounded-full h-2"><div id="freedom-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div></div>
             </div>
         </div>
     </header>
 
     <main class="px-6 mt-6 space-y-6 relative z-0">
         <div class="grid grid-cols-2 gap-4">
-            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50">
-                <div class="flex items-center space-x-2 text-emerald-400 mb-2"><i class="ph-fill ph-wallet text-xl"></i><span class="text-xs">Total Income</span></div>
-                <p class="text-xl font-bold text-white truncate" id="total-income">₹0</p>
-            </div>
-            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50">
-                <div class="flex items-center space-x-2 text-red-400 mb-2"><i class="ph-fill ph-warning-circle text-xl"></i><span class="text-xs">Liabilities (EMI)</span></div>
-                <p class="text-xl font-bold text-orange-400 truncate" id="total-liabilities">₹0</p>
-            </div>
+            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50"><div class="flex items-center space-x-2 text-emerald-400 mb-2"><i class="ph-fill ph-wallet text-xl"></i><span class="text-xs">कुल कमाई</span></div><p class="text-xl font-bold text-white truncate" id="total-income">₹0</p></div>
+            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50"><div class="flex items-center space-x-2 text-red-400 mb-2"><i class="ph-fill ph-warning-circle text-xl"></i><span class="text-xs">किश्तें (EMI)</span></div><p class="text-xl font-bold text-orange-400 truncate" id="total-liabilities">₹0</p></div>
         </div>
-
         <div class="bg-gray-800 p-6 rounded-3xl border border-gray-700/50 shadow-lg mb-8">
-            <div class="relative mb-4">
-                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="search-input" placeholder="Search specific ledger..." class="w-full bg-gray-900 text-sm text-white pl-10 pr-4 py-3 rounded-xl border border-gray-700 focus:border-emerald-500 outline-none">
-            </div>
+            <div class="relative mb-4"><i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i><input type="text" id="search-input" placeholder="हिसाब खोजें..." class="w-full bg-gray-900 text-sm text-white pl-10 pr-4 py-3 rounded-xl border border-gray-700 focus:border-emerald-500 outline-none"></div>
             <div id="transaction-list" class="space-y-4"></div>
         </div>
     </main>
 
-    <button id="fab-btn" class="fixed bottom-8 right-6 bg-emerald-500 hover:bg-emerald-400 text-gray-900 p-4 rounded-2xl shadow-[0_8px_30px_rgba(16,185,129,0.3)] z-40">
-        <i class="ph ph-plus text-3xl font-bold"></i>
-    </button>
+    <button id="fab-btn" class="fixed bottom-8 right-6 bg-emerald-500 hover:bg-emerald-400 text-gray-900 p-4 rounded-2xl shadow-[0_8px_30px_rgba(16,185,129,0.3)] z-40"><i class="ph ph-plus text-3xl font-bold"></i></button>
 
     <div id="add-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end items-center opacity-100">
         <div id="modal-content" class="bg-gray-800 w-full max-w-md rounded-t-[2.5rem] p-8 transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h3 id="modal-title" class="text-2xl font-bold text-white">New Record</h3>
+                <h3 id="modal-title" class="text-2xl font-bold text-white">नया हिसाब</h3>
                 <button id="close-modal-btn" class="text-gray-400 bg-gray-700/50 p-2 rounded-full"><i class="ph ph-x text-xl font-bold"></i></button>
             </div>
             <form id="add-form" class="space-y-4">
                 <input type="hidden" id="edit-id" value="">
-                
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-xs text-gray-400 ml-1">Date</label>
-                        <input type="datetime-local" id="datetime-input" required class="w-full bg-gray-900 text-xs text-white px-3 py-3 rounded-xl border border-gray-700 mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 ml-1">Wallet Source</label>
-                        <select id="wallet-input" class="w-full bg-gray-900 text-sm text-white px-3 py-3 rounded-xl border border-gray-700 mt-1">
-                            <option value="Bank">🏦 Bank</option>
-                            <option value="Cash">💵 Cash</option>
-                            <option value="Credit Card">💳 Credit Card</option>
-                        </select>
-                    </div>
+                    <div><label class="text-xs text-gray-400 ml-1">तारीख</label><input type="datetime-local" id="datetime-input" required class="w-full bg-gray-900 text-xs text-white px-3 py-3 rounded-xl border border-gray-700 mt-1"></div>
+                    <div><label class="text-xs text-gray-400 ml-1">पैसा कहाँ से?</label><select id="wallet-input" class="w-full bg-gray-900 text-sm text-white px-3 py-3 rounded-xl border border-gray-700 mt-1"><option value="Bank">🏦 बैंक (Bank)</option><option value="Cash">💵 नकद (Cash)</option><option value="Credit Card">💳 क्रेडिट कार्ड</option></select></div>
                 </div>
-
+                <div><label class="text-xs text-gray-400 ml-1">रकम (₹)</label><input type="number" id="amount-input" required step="any" class="w-full bg-gray-900 text-2xl font-bold text-white px-4 py-3 rounded-xl border border-gray-700 mt-1"></div>
+                <div><label class="text-xs text-gray-400 ml-1">विवरण (क्या हुआ?)</label><input type="text" id="desc-input" required placeholder="उदा: पेट्रोल भराया" class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 mt-1 placeholder-gray-600"></div>
+                <div class="flex items-center mt-2 mb-2 bg-gray-900/50 p-3 rounded-xl border border-gray-700/50"><input type="checkbox" id="recurring-input" class="w-5 h-5 text-emerald-500 rounded bg-gray-700"><label for="recurring-input" class="ml-3 text-sm text-gray-300">हर महीने का फिक्स (EMI/Bill)</label></div>
                 <div>
-                    <label class="text-xs text-gray-400 ml-1">Amount (₹)</label>
-                    <input type="number" id="amount-input" required step="any" class="w-full bg-gray-900 text-2xl font-bold text-white px-4 py-3 rounded-xl border border-gray-700 mt-1">
-                </div>
-
-                <div>
-                    <label class="text-xs text-gray-400 ml-1">Description</label>
-                    <input type="text" id="desc-input" required class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 mt-1">
-                </div>
-
-                <div class="flex items-center mt-2 mb-2 bg-gray-900/50 p-3 rounded-xl border border-gray-700/50">
-                    <input type="checkbox" id="recurring-input" class="w-5 h-5 text-emerald-500 rounded bg-gray-700">
-                    <label for="recurring-input" class="ml-3 text-sm text-gray-300">Monthly recurring EMI/Bill</label>
-                </div>
-
-                <div>
-                    <label class="text-xs text-gray-400 ml-1 block mb-2">Category (Rich Dad Rules)</label>
-                    <div class="grid grid-cols-3 gap-2 mb-2">
-                        <button type="button" data-category="Need" class="cat-btn bg-blue-500 text-white py-2 rounded-xl text-xs font-semibold">Need</button>
-                        <button type="button" data-category="Want" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Want</button>
-                        <button type="button" data-category="Liability" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Liability</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button type="button" data-category="Active Income" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Active Income</button>
-                        <button type="button" data-category="Passive Income" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Passive Income</button>
-                        <button type="button" data-category="Asset" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">Asset</button>
-                    </div>
+                    <label class="text-xs text-gray-400 ml-1 block mb-2">Category (श्रेणी)</label>
+                    <div class="grid grid-cols-3 gap-2 mb-2"><button type="button" data-category="Need" class="cat-btn bg-blue-500 text-white py-2 rounded-xl text-xs font-semibold">ज़रूरत (Need)</button><button type="button" data-category="Want" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">शौक (Want)</button><button type="button" data-category="Liability" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">उधार (Liability)</button></div>
+                    <div class="grid grid-cols-2 gap-2 mb-2"><button type="button" data-category="Active Income" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">फिक्स कमाई (Active)</button><button type="button" data-category="Passive Income" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">बिना काम कमाई (Passive)</button></div>
+                    <div class="grid grid-cols-2 gap-2"><button type="button" data-category="Capital Gain" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">एकमुश्त कमाई (One-Time)</button><button type="button" data-category="Asset" class="cat-btn bg-gray-700 text-gray-300 py-2 rounded-xl text-xs font-semibold">संपत्ति / निवेश (Asset)</button></div>
                     <input type="hidden" id="selected-category" value="Need">
                 </div>
-
-                <button type="submit" class="w-full bg-emerald-500 text-gray-900 font-extrabold py-4 rounded-xl mt-2">Save Record</button>
+                <button type="submit" class="w-full bg-emerald-500 text-gray-900 font-extrabold py-4 rounded-xl mt-2 shadow-lg">सेव करें</button>
             </form>
         </div>
     </div>
 
     <div id="advisor-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex-col justify-center items-center opacity-100 p-6">
         <div class="bg-gray-800 w-full max-w-md rounded-[2rem] p-8 shadow-[0_0_40px_rgba(168,85,247,0.2)] border border-purple-900/50">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center space-x-2">
-                    <i class="ph-fill ph-robot text-3xl text-purple-400"></i>
-                    <h3 class="text-xl font-bold text-white">Rich Dad AI</h3>
-                </div>
-                <button id="close-advisor-btn" class="text-gray-400 hover:text-white"><i class="ph ph-x text-2xl"></i></button>
-            </div>
-            
-            <p class="text-sm text-gray-400 mb-6">Me aapke financials check karke bataunga ki aapko konsi chiz leni chahiye ya nahi.</p>
-
-            <label class="text-sm font-medium text-gray-300 block mb-2">Main kya kharidne ka soch raha hu?</label>
+            <div class="flex justify-between items-center mb-6"><div class="flex items-center space-x-2"><i class="ph-fill ph-robot text-3xl text-purple-400"></i><h3 class="text-xl font-bold text-white">AI सलाहकार</h3></div><button id="close-advisor-btn" class="text-gray-400 hover:text-white"><i class="ph ph-x text-2xl"></i></button></div>
+            <p class="text-sm text-gray-400 mb-6">मैं आपकी असली कमाई देखकर बताऊंगा कि आपको कौन सी चीज़ लेनी चाहिए या नहीं।</p>
+            <label class="text-sm font-medium text-gray-300 block mb-2">क्या खरीदने का सोच रहे हैं?</label>
             <select id="purchase-type" class="w-full bg-gray-900 text-white px-4 py-4 rounded-xl border border-gray-700 outline-none mb-6">
-                <option value="Car">🚗 Nayi Gaadi (Car)</option>
-                <option value="Home">🏠 Naya Ghar (Home)</option>
-                <option value="Gadget">📱 Gadget / Luxury</option>
+                <option value="Car">🚗 नयी गाड़ी (Car)</option><option value="Home">🏠 नया घर (Home)</option><option value="Gadget">📱 गैजेट / बाइक / शौक</option>
             </select>
-
-            <button id="run-advisor-btn" class="w-full bg-purple-500 text-white font-extrabold py-4 rounded-xl hover:bg-purple-400 transition-colors shadow-lg shadow-purple-500/30">
-                Check My Reality
-            </button>
-
+            <button id="run-advisor-btn" class="w-full bg-purple-500 text-white font-extrabold py-4 rounded-xl hover:bg-purple-400 transition-colors shadow-lg shadow-purple-500/30">चेक करें (Reality Check)</button>
             <div id="advisor-result" class="mt-6 hidden bg-gray-900 p-5 rounded-2xl border border-gray-700">
-                <h4 id="adv-title" class="font-bold text-lg mb-2">Verdict</h4>
-                <p id="adv-desc" class="text-sm text-gray-300 mb-3"></p>
-                <div class="bg-gray-800 p-3 rounded-xl">
-                    <p class="text-xs text-gray-400">Safe Budget Limit:</p>
-                    <p id="adv-budget" class="text-2xl font-bold text-emerald-400">₹0</p>
+                <h4 id="adv-title" class="font-bold text-lg mb-2">नतीजा</h4><p id="adv-desc" class="text-sm text-gray-300 mb-3"></p>
+                <div class="bg-gray-800 p-3 rounded-xl"><p class="text-xs text-gray-400">आपका सुरक्षित बजट:</p><p id="adv-budget" class="text-2xl font-bold text-emerald-400">₹0</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex-col justify-center items-center opacity-100 p-4">
+        <div class="bg-gray-800 w-full max-w-md rounded-[2rem] p-6 shadow-2xl border border-gray-700 h-[80vh] overflow-y-auto relative">
+            <div class="sticky top-0 bg-gray-800/95 backdrop-blur-sm pb-4 pt-2 flex justify-between items-center border-b border-gray-700 z-10">
+                <div class="flex items-center space-x-2"><i class="ph-fill ph-book-open-text text-3xl text-yellow-400"></i><h3 class="text-xl font-bold text-white">एंट्री कैसे करें?</h3></div>
+                <button id="close-guide-btn" class="text-gray-400 hover:text-white bg-gray-700/50 p-2 rounded-full"><i class="ph ph-x text-xl font-bold"></i></button>
+            </div>
+            <div class="mt-6 space-y-6">
+                <div>
+                    <h4 class="font-bold text-blue-400 flex items-center mb-2"><i class="ph-fill ph-shopping-cart mr-2"></i> खर्च (Expenses)</h4>
+                    <p class="text-sm text-gray-300 mb-2"><span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-bold text-xs">ज़रूरत (Need):</span> जिसके बिना ज़िंदा नहीं रह सकते। <br><span class="text-xs text-gray-400">उदा: रोटी, कपड़ा, किराया, बिजली बिल, स्कूल फीस, दवाई।</span></p>
+                    <p class="text-sm text-gray-300"><span class="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-bold text-xs">शौक (Want):</span> जिसके बिना काम चल सकता था। <br><span class="text-xs text-gray-400">उदा: बाहर का खाना, महंगे कपड़े, मूवी, नया फोन।</span></p>
+                </div>
+                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50">
+                    <h4 class="font-bold text-white mb-3 border-b border-gray-700 pb-2">अमीर vs गरीब बनाने वाले</h4>
+                    <p class="text-sm text-gray-300 mb-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold text-xs">संपत्ति / निवेश (Asset) 🌳:</span> जो आपको पैसा कमाकर देगी। (इसकी एंट्री करने से Net Worth कम नहीं होती)। <br><span class="text-gray-400 text-xs">उदा: SIP, म्यूच्यूअल फंड, FD, सोना, ज़मीन, या किसी को उधार दिया हुआ पैसा, BC/Chit Fund की बचत।</span></p>
+                    <p class="text-sm text-gray-300"><span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold text-xs">उधार (Liability) 🔴:</span> जो हर महीने आपकी जेब से पैसा निकालेगी। <br><span class="text-gray-400 text-xs">उदा: क्रेडिट कार्ड का बिल, गाड़ी की EMI, लोन। (BC उठाने के बाद जो क़िस्त भरते हैं वो भी Liability है)।</span></p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-emerald-400 flex items-center mb-2"><i class="ph-fill ph-money mr-2"></i> कमाई (Income)</h4>
+                    <ul class="text-sm text-gray-300 space-y-3 list-disc pl-4">
+                        <li><strong class="text-white">फिक्स कमाई (Active):</strong> आपकी सैलरी या दुकान की रोज़ की कमाई।</li>
+                        <li><strong class="text-emerald-300">बिना काम कमाई (Passive):</strong> बिना काम किये आने वाला पैसा! (दुकान का किराया, FD का ब्याज)। यह आज़ादी (Freedom) मीटर बढ़ाता है।</li>
+                        <li><strong class="text-blue-300">एकमुश्त कमाई (Capital Gain):</strong> मोटा पैसा जो कभी-कभार आता है। उदा: ज़मीन बेचना, या BC/Chit Fund उठाना।</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="app.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-        }
-    </script>
+    <script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }</script>
 </body>
 </html>
