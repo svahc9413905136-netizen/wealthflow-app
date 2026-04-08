@@ -27,12 +27,10 @@
 
     <div id="pin-screen" class="fixed inset-0 bg-gray-900 z-[100] flex flex-col justify-center items-center p-6 transition-opacity duration-300">
         <div id="pin-box" class="bg-gray-800 p-8 rounded-[2rem] shadow-2xl w-full max-w-sm border border-gray-700 text-center transition-transform">
-            
             <div id="pin-main-view">
                 <i id="lock-icon" class="ph-fill ph-lock-key text-6xl text-emerald-400 mb-4 inline-block drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-colors"></i>
                 <h2 id="pin-title" class="text-2xl font-bold text-white mb-2">सिक्योरिटी पिन</h2>
                 <p id="pin-desc" class="text-sm text-gray-400 mb-4">पहली बार 4-अंकों का नया पिन सेट करें</p>
-                
                 <p id="lockout-timer" class="text-red-400 font-bold text-lg mb-4 hidden"></p>
 
                 <div id="setup-extras" class="hidden mb-6 text-left bg-gray-900 p-4 rounded-xl border border-gray-700">
@@ -69,7 +67,6 @@
                     <button id="hard-reset-btn" class="text-xs text-red-400 underline hover:text-red-300 transition-colors">कुछ भी याद नहीं? (सारा डेटा डिलीट करें)</button>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -85,9 +82,10 @@
             <button id="reset-app-btn" class="flex items-center space-x-1 text-red-400 bg-red-900/30 px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-800/50 transition-colors"><i class="ph-fill ph-trash text-lg"></i> <span>ऐप रिसेट</span></button>
         </div>
         
-        <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded-2xl border border-gray-700/50 mb-4">
+        <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded-2xl border border-gray-700/50 mb-4 shadow-inner">
             <button id="prev-month-btn" class="text-gray-400 hover:text-white p-1 transition-colors"><i class="ph-fill ph-caret-left text-xl"></i></button>
-            <h3 id="current-month-display" class="text-white font-bold text-sm tracking-wide"></h3>
+            <h3 id="current-month-display" class="text-white font-bold text-xs tracking-wide text-center flex-1"></h3>
+            <button id="custom-range-open-btn" class="text-emerald-400 hover:text-emerald-300 p-1 mx-2 transition-colors" title="Custom Date Filter"><i class="ph-fill ph-calendar-blank text-xl"></i></button>
             <button id="next-month-btn" class="text-gray-400 hover:text-white p-1 transition-colors"><i class="ph-fill ph-caret-right text-xl"></i></button>
         </div>
 
@@ -103,7 +101,7 @@
             
             <div class="mt-5 pt-4 border-t border-gray-700/50">
                 <div class="flex justify-between text-xs text-gray-400 mb-1">
-                    <span>इस महीने की आज़ादी (Monthly Freedom)</span>
+                    <span>आज़ादी मीटर (Filtered Range)</span>
                     <span id="freedom-text" class="font-bold text-emerald-400 transition-all">0%</span>
                 </div>
                 <div class="w-full bg-gray-800 rounded-full h-2">
@@ -116,18 +114,18 @@
     <main class="px-6 mt-6 space-y-6 relative z-0">
         
         <div class="grid grid-cols-2 gap-4">
-            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50">
-                <div class="flex items-center space-x-2 text-emerald-400 mb-2"><i class="ph-fill ph-wallet text-xl"></i><span class="text-xs">महीने की कमाई</span></div>
+            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50 shadow-lg">
+                <div class="flex items-center space-x-2 text-emerald-400 mb-2"><i class="ph-fill ph-wallet text-xl"></i><span class="text-xs">कुल कमाई</span></div>
                 <p class="text-xl font-bold text-white truncate transition-all" id="total-income">₹0</p>
             </div>
-            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50">
-                <div class="flex items-center space-x-2 text-red-400 mb-2"><i class="ph-fill ph-warning-circle text-xl"></i><span class="text-xs">महीने की किश्तें</span></div>
+            <div class="bg-gray-800 p-4 rounded-3xl border border-gray-700/50 shadow-lg">
+                <div class="flex items-center space-x-2 text-red-400 mb-2"><i class="ph-fill ph-warning-circle text-xl"></i><span class="text-xs">कुल किश्तें/EMI</span></div>
                 <p class="text-xl font-bold text-orange-400 truncate transition-all" id="total-liabilities">₹0</p>
             </div>
         </div>
 
         <div class="bg-gray-800 p-5 rounded-3xl border border-gray-700/50 flex flex-col mb-6 shadow-lg">
-            <p class="text-gray-400 text-sm font-medium w-full text-left mb-4">खर्च का विश्लेषण (Monthly Report)</p>
+            <p class="text-gray-400 text-sm font-medium w-full text-left mb-4">खर्च का विश्लेषण (Filtered Report)</p>
             <div class="flex items-center justify-between">
                 <div class="w-32 h-32 relative"><canvas id="expense-chart"></canvas></div>
                 <div class="w-1/2 space-y-3">
@@ -145,7 +143,7 @@
         <div class="bg-gray-800 p-6 rounded-3xl border border-gray-700/50 shadow-lg mb-8">
             <div class="relative mb-4">
                 <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="search-input" placeholder="महीने का हिसाब खोजें (उदा: Petrol)..." class="w-full bg-gray-900 text-sm text-white pl-10 pr-4 py-3 rounded-xl border border-gray-700 focus:border-emerald-500 outline-none transition-colors">
+                <input type="text" id="search-input" placeholder="इस लिस्ट में खोजें (उदा: Petrol)..." class="w-full bg-gray-900 text-sm text-white pl-10 pr-4 py-3 rounded-xl border border-gray-700 focus:border-emerald-500 outline-none transition-colors">
             </div>
             
             <div id="search-summary" class="hidden bg-gray-900/80 p-4 rounded-xl border border-emerald-500/30 mb-4 shadow-inner">
@@ -170,6 +168,27 @@
     <button id="fab-btn" class="fixed bottom-8 right-6 bg-emerald-500 hover:bg-emerald-400 text-gray-900 p-4 rounded-2xl shadow-[0_8px_30px_rgba(16,185,129,0.3)] z-40 transition-transform transform hover:scale-105">
         <i class="ph ph-plus text-3xl font-bold"></i>
     </button>
+
+    <div id="custom-range-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex-col justify-center items-center opacity-100 p-6 transition-opacity">
+        <div class="bg-gray-800 w-full max-w-sm rounded-[2rem] p-8 border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white flex items-center"><i class="ph-fill ph-calendar-plus mr-2 text-emerald-400"></i> कस्टम डेट फिल्टर</h3>
+                <button id="close-range-btn" class="text-gray-400 hover:text-white transition-colors"><i class="ph ph-x text-2xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">कब से (Start Date)?</label>
+                    <input type="date" id="range-start" class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 outline-none focus:border-emerald-500 transition-colors">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 mb-1 block">कब तक (End Date)?</label>
+                    <input type="date" id="range-end" class="w-full bg-gray-900 text-sm text-white px-4 py-3 rounded-xl border border-gray-700 outline-none focus:border-emerald-500 transition-colors">
+                </div>
+            </div>
+            <button id="apply-range-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-900 font-extrabold py-4 rounded-xl mt-6 transition-colors shadow-lg">फिल्टर लगाएँ</button>
+            <button id="reset-range-btn" class="w-full text-red-400 hover:text-red-300 text-sm font-bold py-3 mt-2 transition-colors">कस्टम फिल्टर हटाएँ</button>
+        </div>
+    </div>
 
     <div id="add-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end items-center opacity-100 transition-opacity">
         <div id="modal-content" class="bg-gray-800 w-full max-w-md rounded-t-[2.5rem] p-8 transform translate-y-full transition-transform duration-300 max-h-[90vh] overflow-y-auto">
@@ -239,7 +258,7 @@
                 <div class="flex items-center space-x-2"><i class="ph-fill ph-robot text-3xl text-purple-400"></i><h3 class="text-xl font-bold text-white">AI सलाहकार</h3></div>
                 <button id="close-advisor-btn" class="text-gray-400 hover:text-white transition-colors"><i class="ph ph-x text-2xl"></i></button>
             </div>
-            <p class="text-sm text-gray-400 mb-6">मैं आपकी असली कमाई देखकर बताऊंगा कि आपको कौन सी चीज़ लेनी चाहिए या नहीं।</p>
+            <p class="text-sm text-gray-400 mb-6">मैं आपकी (फिल्टर की गई) कमाई देखकर बताऊंगा कि आपको कौन सी चीज़ लेनी चाहिए या नहीं।</p>
             
             <label class="text-sm font-medium text-gray-300 block mb-2">क्या खरीदने का सोच रहे हैं?</label>
             <select id="purchase-type" class="w-full bg-gray-900 text-white px-4 py-4 rounded-xl border border-gray-700 outline-none focus:border-purple-500 mb-6 transition-colors">
@@ -267,20 +286,20 @@
             <div class="mt-6 space-y-6">
                 <div>
                     <h4 class="font-bold text-blue-400 flex items-center mb-2"><i class="ph-fill ph-shopping-cart mr-2"></i> खर्च (Expenses)</h4>
-                    <p class="text-sm text-gray-300 mb-2"><span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-bold text-xs">ज़रूरत (Need):</span> जिसके बिना ज़िंदा नहीं रह सकते। <br><span class="text-xs text-gray-400">उदा: रोटी, कपड़ा, किराया, बिजली बिल, स्कूल फीस, दवाई।</span></p>
-                    <p class="text-sm text-gray-300"><span class="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-bold text-xs">शौक (Want):</span> जिसके बिना काम चल सकता था। <br><span class="text-xs text-gray-400">उदा: बाहर का खाना, महंगे कपड़े, मूवी, नया फोन।</span></p>
+                    <p class="text-sm text-gray-300 mb-2"><span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-bold text-xs">ज़रूरत (Need):</span> जिसके बिना ज़िंदा नहीं रह सकते।</p>
+                    <p class="text-sm text-gray-300"><span class="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-bold text-xs">शौक (Want):</span> जिसके बिना काम चल सकता था।</p>
                 </div>
                 <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50">
                     <h4 class="font-bold text-white mb-3 border-b border-gray-700 pb-2">अमीर vs गरीब बनाने वाले</h4>
-                    <p class="text-sm text-gray-300 mb-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold text-xs">संपत्ति / निवेश (Asset) 🌳:</span> जो आपको पैसा कमाकर देगी। (इसकी एंट्री करने से Net Worth कम नहीं होती)। <br><span class="text-gray-400 text-xs">उदा: SIP, म्यूच्यूअल फंड, FD, सोना, ज़मीन, या किसी को उधार दिया हुआ पैसा, BC/Chit Fund की बचत।</span></p>
-                    <p class="text-sm text-gray-300"><span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold text-xs">उधार (Liability) 🔴:</span> जो हर महीने आपकी जेब से पैसा निकालेगी। <br><span class="text-gray-400 text-xs">उदा: क्रेडिट कार्ड का बिल, गाड़ी की EMI, लोन। (BC उठाने के बाद जो क़िस्त भरते हैं वो भी Liability है)।</span></p>
+                    <p class="text-sm text-gray-300 mb-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold text-xs">संपत्ति / निवेश (Asset) 🌳:</span> जो आपको पैसा कमाकर देगी।</p>
+                    <p class="text-sm text-gray-300"><span class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold text-xs">उधार (Liability) 🔴:</span> जो हर महीने आपकी जेब से पैसा निकालेगी।</p>
                 </div>
                 <div>
                     <h4 class="font-bold text-emerald-400 flex items-center mb-2"><i class="ph-fill ph-money mr-2"></i> कमाई (Income)</h4>
                     <ul class="text-sm text-gray-300 space-y-3 list-disc pl-4">
-                        <li><strong class="text-white">फिक्स कमाई (Active):</strong> आपकी सैलरी या दुकान की रोज़ की कमाई।</li>
-                        <li><strong class="text-emerald-300">बिना काम कमाई (Passive):</strong> बिना काम किये आने वाला पैसा! (दुकान का किराया, FD का ब्याज)। यह आज़ादी (Freedom) मीटर बढ़ाता है।</li>
-                        <li><strong class="text-blue-300">एकमुश्त कमाई (Capital Gain):</strong> मोटा पैसा जो कभी-कभार आता है। उदा: ज़मीन बेचना, या BC/Chit Fund उठाना।</li>
+                        <li><strong class="text-white">फिक्स कमाई (Active):</strong> आपकी सैलरी या रोज़ की कमाई।</li>
+                        <li><strong class="text-emerald-300">बिना काम कमाई (Passive):</strong> बिना काम किये आने वाला पैसा!</li>
+                        <li><strong class="text-blue-300">एकमुश्त कमाई (Capital Gain):</strong> मोटा पैसा जो कभी-कभार आता है।</li>
                     </ul>
                 </div>
             </div>
@@ -288,7 +307,6 @@
     </div>
 
     <script src="app.js"></script>
-    
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then(registration => {
@@ -296,13 +314,11 @@
                     const newWorker = registration.installing;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('New update available. Refreshing...');
                             window.location.reload(); 
                         }
                     });
                 });
             }).catch(error => console.error('ServiceWorker error:', error));
-
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) { window.location.reload(); refreshing = true; }
