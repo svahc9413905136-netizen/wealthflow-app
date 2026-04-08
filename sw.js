@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wealthflow-v7-master';
+const CACHE_NAME = 'wealthflow-v8-master';
 const urlsToCache = [
     './',
     './index.html',
